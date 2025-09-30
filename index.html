@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+    <meta name="referrer" content="no-referrer">
+    <title>Secure Password Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .privacy-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .privacy-banner svg {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .privacy-banner strong {
+            font-weight: 600;
+        }
+        .container {
+            min-height: calc(100vh - 44px);
+            background: linear-gradient(to bottom right, #1e3a8a, #1e40af);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .grid {
+            max-width: 1280px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            align-items: center;
+        }
+        .hero {
+            color: white;
+            padding: 20px;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 3.75rem);
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: #dbeafe;
+            max-width: 500px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 448px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 24px;
+        }
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+        .type-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .type-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            background: #f9fafb;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .type-btn.active {
+            border-color: #93c5fd;
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        .type-btn:hover {
+            background: #f3f4f6;
+        }
+        .slider-container {
+            margin-bottom: 16px;
+        }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .slider-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .slider-value {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+        }
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .toggle-row:last-child {
+            margin-bottom: 0;
+        }
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            border-radius: 12px;
+            background: #d1d5db;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle.active {
+            background: #3b82f6;
+        }
+        .toggle-thumb {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            transition: left 0.2s;
+        }
+        .toggle.active .toggle-thumb {
+            left: 28px;
+        }
+        .password-display {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            font-family: monospace;
+            font-size: 1.125rem;
+            color: #1f2937;
+            word-break: break-all;
+            min-height: 60px;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .btn-primary {
+            flex: 1;
+            background: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .btn-primary:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: white;
+            border: 2px solid #2563eb;
+            color: #2563eb;
+        }
+        .btn-secondary:hover {
+            background: #eff6ff;
+        }
+        .icon {
+            width: 18px;
+            height: 18px;
+        }
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="privacy-banner">
+        <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <strong>100% Secure & Private:</strong> All passwords are generated in your browser. Nothing is ever sent to any server.
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <div class="hero">
+                <h1>
+                    Strong. Secure.<br>
+                    Awesome. Try our<br>
+                    random password<br>
+                    generator.
+                </h1>
+                <p>
+                    A powerful generator for powerful passwords to protect your online accounts.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="section">
+                    <h3>Choose password type</h3>
+                    <div class="type-buttons">
+                        <button class="type-btn active" data-type="random">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+                            </svg>
+                            Random
+                        </button>
+                        <button class="type-btn" data-type="memorable">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2ZM14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+                            </svg>
+                            Memorable
+                        </button>
+                        <button class="type-btn" data-type="pin">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/>
+                            </svg>
+                            PIN
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Customize your new password</h3>
+                    
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label">Characters</span>
+                            <span class="slider-value" id="lengthValue">20</span>
+                        </div>
+                        <input type="range" id="lengthSlider" min="6" max="50" value="20">
+                    </div>
+
+                    <div id="options">
+                        <div class="toggle-row">
+                            <span class="slider-label">Numbers</span>
+                            <button class="toggle active" id="numbersToggle">
+                                <div class="toggle-thumb"></div>
+                            </button>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="slider-label">Symbols</span>
+                            <button class="toggle" id="symbolsToggle">
+                                <div class="toggle-thumb"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Generated password</h3>
+                    <div class="password-display" id="passwordDisplay">
+                        Click refresh to generate
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="copyBtn">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+                            </svg>
+                            Copy password
+                        </button>
+                        <button class="btn btn-secondary" id="refreshBtn">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let state = {
+            type: 'random',
+            length: 20,
+            includeNumbers: true,
+            includeSymbols: false,
+            password: ''
+        };
+
+        // Word lists for memorable passwords
+        const words5 = ['about', 'above', 'after', 'again', 'among', 'being', 'below', 'could', 'every', 'first', 'found', 'given', 'going', 'great', 'group', 'heard', 'house', 'large', 'later', 'might', 'never', 'often', 'order', 'other', 'place', 'point', 'right', 'shall', 'since', 'small', 'sound', 'start', 'state', 'still', 'study', 'their', 'there', 'these', 'thing', 'think', 'those', 'three', 'under', 'until', 'water', 'where', 'which', 'while', 'world', 'would', 'write', 'young', 'black', 'bring', 'build', 'child', 'class', 'close', 'early', 'field', 'final', 'force', 'front', 'hands', 'heart', 'light', 'local', 'money', 'music', 'north', 'paper', 'party', 'peace', 'plant', 'power', 'press', 'quick', 'quite', 'radio', 'reach', 'sense', 'short', 'shown', 'sleep', 'space', 'speak', 'spent', 'stage', 'stand', 'thank', 'today', 'trade', 'tried', 'value', 'voice', 'white', 'whose', 'woman', 'women', 'books', 'cards', 'chair', 'death', 'doing', 'drive', 'earth', 'eight', 'email', 'empty', 'event', 'floor', 'green', 'happy', 'heavy', 'horse', 'image', 'issue', 'level', 'lives', 'means', 'model', 'movie', 'photo', 'phone', 'piece', 'plane', 'price', 'queen', 'range', 'scene', 'seven', 'sheet', 'smile', 'story', 'style', 'sugar', 'table', 'train', 'truck', 'uncle', 'visit', 'watch', 'worth', 'years'];
+        
+        const words6 = ['around', 'before', 'change', 'coming', 'during', 'follow', 'friend', 'ground', 'having', 'inside', 'little', 'living', 'making', 'mother', 'moving', 'number', 'office', 'opened', 'people', 'person', 'places', 'rather', 'reason', 'really', 'school', 'second', 'should', 'simple', 'social', 'taking', 'things', 'though', 'travel', 'turned', 'trying', 'united', 'walked', 'wanted', 'worked', 'yellow', 'always', 'animal', 'answer', 'become', 'better', 'course', 'dollar', 'enough', 'entire', 'family', 'father', 'figure', 'future', 'happen', 'helper', 'indeed', 'joined', 'killed', 'latest', 'leader', 'letter', 'listen', 'manner', 'matter', 'minute', 'moment', 'months', 'nature', 'notice', 'option', 'others', 'player', 'please', 'policy', 'pretty', 'public', 'result', 'return', 'screen', 'senior', 'sister', 'spring', 'street', 'summer', 'system', 'theory', 'winter', 'wonder', 'action', 'amount', 'appear', 'artist', 'battle', 'bridge', 'budget', 'camera', 'chance', 'choice', 'client', 'corner', 'debate', 'design', 'detail', 'device', 'driver', 'effort', 'finger', 'garage', 'island', 'journey', 'market', 'memory', 'method', 'mirror', 'mobile', 'monday', 'object', 'palace', 'parent', 'priest', 'prison', 'region', 'report', 'safety', 'search', 'server', 'studio', 'temple', 'thread', 'ticket', 'turkey', 'update', 'valley', 'vision', 'window'];
+        
+        const words7 = ['already', 'another', 'between', 'billion', 'brought', 'brother', 'century', 'company', 'counsel', 'country', 'evening', 'example', 'feeling', 'forward', 'getting', 'himself', 'instead', 'justice', 'keeping', 'looking', 'machine', 'manager', 'meeting', 'members', 'morning', 'nothing', 'pattern', 'perhaps', 'picture', 'playing', 'popular', 'prepare', 'present', 'problem', 'product', 'program', 'purpose', 'quarter', 'quickly', 'reading', 'related', 'results', 'running', 'science', 'section', 'serious', 'service', 'society', 'station', 'student', 'surface', 'talking', 'teacher', 'thought', 'tonight', 'trouble', 'towards', 'version', 'village', 'waiting', 'weather', 'wedding', 'weekend', 'whether', 'without', 'working', 'writing', 'ability', 'account', 'address', 'airline', 'airport', 'amazing', 'ancient', 'article', 'balance', 'bedroom', 'beneath', 'bicycle', 'cabinet', 'capital', 'captain', 'careful', 'chicken', 'college', 'comment', 'concept', 'cooking', 'correct', 'courage', 'culture', 'dancing', 'diamond', 'digital', 'discuss', 'factory', 'fantasy', 'fashion', 'feature', 'finance', 'fishing', 'foreign', 'freedom', 'gallery', 'general', 'healthy', 'highway', 'history', 'holiday', 'husband', 'imagine', 'kitchen', 'library', 'medical', 'message', 'mission', 'network', 'opinion', 'package', 'parking', 'partner', 'passion', 'patient', 'perfect', 'plastic', 'private', 'project', 'promise', 'provide', 'quality', 'reality', 'seventh', 'shelter', 'similar', 'special', 'storage', 'strange', 'succeed', 'support', 'therapy', 'traffic', 'welcome', 'western'];
+
+        // Password generation functions
+        function generateRandomPassword() {
+            const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+            const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const numbers = '0123456789';
+            const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            
+            let charset = lowercase + uppercase;
+            if (state.includeNumbers) charset += numbers;
+            if (state.includeSymbols) charset += symbols;
+            
+            let password = '';
+            for (let i = 0; i < state.length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            return password;
+        }
+
+        function generateMemorablePassword() {
+            const allWords = [...words5, ...words6, ...words7];
+            const selectedWords = [];
+            const numWords = Math.max(2, Math.min(4, Math.floor(state.length / 8)));
+            
+            for (let i = 0; i < numWords; i++) {
+                selectedWords.push(allWords[Math.floor(Math.random() * allWords.length)]);
+            }
+            
+            let password = selectedWords.map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join('-');
+            
+            if (state.includeNumbers) {
+                password += '-' + Math.floor(Math.random() * 1000);
+            }
+            if (state.includeSymbols) {
+                password += '!@#'[Math.floor(Math.random() * 3)];
+            }
+            
+            return password;
+        }
+
+        function generatePIN() {
+            const pinLength = Math.min(state.length, 8);
+            let pin = '';
+            for (let i = 0; i < pinLength; i++) {
+                pin += Math.floor(Math.random() * 10);
+            }
+            return pin;
+        }
+
+        function generatePassword() {
+            let password = '';
+            switch (state.type) {
+                case 'random':
+                    password = generateRandomPassword();
+                    break;
+                case 'memorable':
+                    password = generateMemorablePassword();
+                    break;
+                case 'pin':
+                    password = generatePIN();
+                    break;
+            }
+            state.password = password;
+            document.getElementById('passwordDisplay').textContent = password;
+        }
+
+        // Event handlers
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                state.type = this.dataset.type;
+                
+                // Show/hide options for PIN
+                const optionsDiv = document.getElementById('options');
+                if (state.type === 'pin') {
+                    optionsDiv.style.display = 'none';
+                } else {
+                    optionsDiv.style.display = 'block';
+                }
+                
+                generatePassword();
+            });
+        });
+
+        document.getElementById('lengthSlider').addEventListener('input', function() {
+            state.length = parseInt(this.value);
+            document.getElementById('lengthValue').textContent = this.value;
+            generatePassword();
+        });
+
+        document.getElementById('numbersToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            state.includeNumbers = this.classList.contains('active');
+            generatePassword();
+        });
+
+        document.getElementById('symbolsToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            state.includeSymbols = this.classList.contains('active');
+            generatePassword();
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            generatePassword();
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', async function() {
+            if (!state.password) return;
+            
+            try {
+                await navigator.clipboard.writeText(state.password);
+                const originalText = this.innerHTML;
+                this.innerHTML = '<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Copied!';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy password');
+            }
+        });
+
+        // Generate initial password
+        generatePassword();
+    </script>
+</body>
+</html>
